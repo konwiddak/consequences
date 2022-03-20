@@ -1,10 +1,27 @@
-from dash import Dash, html, dcc
-from layout import base_layout
+from flask import Flask, render_template, request, Markup
+from dbs import get_users
 
-app = Dash(__name__)
+app = Flask(__name__)
 
-app.layout = base_layout
+@app.route("/")
+def new_game():
+    return render_template('new_game.html')
 
-if __name__ == '__main__':
-    # visit http://127.0.0.1:8050/ in your web browser
-    app.run_server(debug=True)
+@app.route('/join_game', methods=['POST'])
+def create():
+    data = request.form
+    user = data['uname']
+    gid = data['gid']
+    #add user(data.uname)
+    users = get_users(gid)
+    users.append(user)
+    us = "<br>\n".join(users)
+    us = Markup(us)
+    return render_template('lobby.html', users=us)
+
+@app.route('/game', methods=['POST'])
+def game():
+    return render_template('draw.html')
+
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0")
